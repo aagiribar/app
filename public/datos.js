@@ -23,6 +23,9 @@ let controlOrbital;
 
 const gui = new GUI();
 let elementosUI;
+let selectorMapa;
+
+let raycaster;
 
 init();
 animationLoop();
@@ -57,12 +60,15 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    raycaster = new THREE.Raycaster();
+    document.addEventListener("click", onDocumentClick);
+
     controlOrbital = new OrbitControls(camara, renderer.domElement);
 
-    mapaEs = Plano(0, 0, 0);
+    mapaEs = Plano(0, 0, 0, "España");
     texturizarPlano(mapaEs, "mapa_es.png");
 
-    mapaCan = Plano(-10, 0, 0);
+    mapaCan = Plano(-10, 0, 0, "Canarias");
     texturizarPlano(mapaCan, "mapa_can.png");
 
     focoCamara = mapaEs;
@@ -71,7 +77,8 @@ function init() {
         "Mapa seleccionado": "España"
     }
 
-    gui.add(elementosUI, "Mapa seleccionado", ["España", "Canarias"]).onChange(
+    selectorMapa = gui.add(elementosUI, "Mapa seleccionado", ["España", "Canarias"]);
+    selectorMapa.onChange(
         function(valor) {
             if (valor == "España") {
                 focoCamara = mapaEs;
@@ -80,7 +87,7 @@ function init() {
                 focoCamara = mapaCan;
             }
         }
-    );
+    )
 }
 
 
@@ -112,7 +119,7 @@ function procesarDatosParo(contenido) {
     console.log("Archivo con datos de paro cargado");
 }
 
-function Plano(x, y, z) {
+function Plano(x, y, z, nombre = undefined) {
     let geometria = new THREE.PlaneBufferGeometry(5, 5);
     let material = new THREE.MeshBasicMaterial({});
     let mesh = new THREE.Mesh(geometria, material);
@@ -120,6 +127,9 @@ function Plano(x, y, z) {
     mesh.position.set(x, y, z);
     mesh.userData.mapsX = 5;
     mesh.userData.mapsY = 5;
+    if (nombre != undefined) {
+        mesh.userData.nombre = nombre;
+    }
     escena.add(mesh);
     return mesh;
 }
@@ -146,6 +156,22 @@ function texturizarPlano(plano, textura) {
             }
         }
     )
+}
+
+function onDocumentClick(event) {
+    const mouse = {
+        x: (event.clientX / renderer.domElement.clientWidth) * 2 - 1,
+        y: -(event.clientY / renderer.domElement.clientHeight) * 2 + 1,
+    };
+
+    // Intersección, define rayo
+    raycaster.setFromCamera(mouse, camara);
+
+    const intersecciones = raycaster.intersectObjects([mapaEs, mapaCan]);
+    if (intersecciones.length > 0) {
+        focoCamara = intersecciones[0].object;
+        selectorMapa.setValue(focoCamara.userData.nombre);
+    }
 }
 
 function animationLoop() {

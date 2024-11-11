@@ -14,7 +14,7 @@ let maxLat_can = 29.473;
 
 let datosParo = []
 
-let mapaEs, mapaCan
+let mapaEs, mapaCan;
 
 let escena, camara, renderer;
 let controlOrbital;
@@ -55,7 +55,10 @@ function init() {
     controlOrbital = new OrbitControls(camara, renderer.domElement);
 
     mapaEs = Plano(0, 0, 0);
-    texturizarPlano(mapaEs, "mapa_es.png")
+    texturizarPlano(mapaEs, "mapa_es.png");
+
+    mapaCan = Plano(-10, 0, 0);
+    texturizarPlano(mapaCan, "mapa_can.png");
 }
 
 

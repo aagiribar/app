@@ -17,6 +17,7 @@ app.get("/", function (request, response) {
 });
 
 app.use(express.static("assets"));
+app.use(express.static("data"));
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {

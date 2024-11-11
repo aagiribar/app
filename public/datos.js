@@ -1,3 +1,14 @@
+// Latitud y longitud de los extremos del mapa de la imagen
+let minLon_es = -10.24;
+let maxLon_es = 5.03;
+let minLat_es = 34.81;
+let maxLat_es = 44.26;
+
+let minLon_can = -18.402;
+let maxLon_can = -13.310;
+let minLat_can = 27.406;
+let maxLat_can = 29.473;
+
 let datosParo = []
 
 fetch("datos_paro.csv")

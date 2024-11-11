@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 
 // Latitud y longitud de los extremos del mapa de la imagen
 let minLon_es = -10.24;
@@ -17,7 +18,11 @@ let datosParo = []
 let mapaEs, mapaCan;
 
 let escena, camara, renderer;
+let focoCamara;
 let controlOrbital;
+
+const gui = new GUI();
+let elementosUI;
 
 init();
 animationLoop();
@@ -59,6 +64,23 @@ function init() {
 
     mapaCan = Plano(-10, 0, 0);
     texturizarPlano(mapaCan, "mapa_can.png");
+
+    focoCamara = mapaEs;
+
+    elementosUI = {
+        "Mapa seleccionado": "España"
+    }
+
+    gui.add(elementosUI, "Mapa seleccionado", ["España", "Canarias"]).onChange(
+        function(valor) {
+            if (valor == "España") {
+                focoCamara = mapaEs;
+            }
+            else if (valor == "Canarias") {
+                focoCamara = mapaCan;
+            }
+        }
+    );
 }
 
 
@@ -128,5 +150,12 @@ function texturizarPlano(plano, textura) {
 
 function animationLoop() {
     requestAnimationFrame(animationLoop);
+    
+    // Se recoloca el foco de la camara orbital
+    controlOrbital.target.x = focoCamara.position.x;
+    controlOrbital.target.y = focoCamara.position.y;
+    controlOrbital.target.z = focoCamara.position.z;
+    controlOrbital.update();
+
     renderer.render(escena, camara);
 }

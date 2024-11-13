@@ -14,6 +14,7 @@ let minLat_can = 27.406;
 let maxLat_can = 29.473;
 
 let datosParo = []
+let datosGeo = [];
 
 let mapaEs, mapaCan;
 
@@ -40,6 +41,20 @@ function init() {
     })
     .then(contenido => {
         procesarDatosParo(contenido);
+    })
+    .catch(error => {
+        console.error("Error al cargar el archivo", error);
+    });
+
+    fetch("datos_geo.csv")
+    .then(respuesta => {
+        if (!respuesta.ok) {
+            throw new Error("Error: " + respuesta.statusText);
+        }
+        return respuesta.text();
+    })
+    .then(contenido => {
+        procesarDatosGeo(contenido);
     })
     .catch(error => {
         console.error("Error al cargar el archivo", error);
@@ -119,6 +134,32 @@ function procesarDatosParo(contenido) {
     console.log("Archivo con datos de paro cargado");
 }
 
+function procesarDatosGeo(contenido) {
+    const sep = ";";
+    const filas = contenido.split("\n");
+
+    const encabezados = filas[0].split(sep);
+
+    const indices = {
+        nombre: encabezados.indexOf("Provincia"),
+        latitud: encabezados.indexOf("Latitud"),
+        longitud: encabezados.indexOf("Longitud")
+    }
+
+    for (let i = 1; i < filas.length; i++) {
+        const columna = filas[i].split(sep);
+        if(columna.length > 1) {
+            datosGeo.push({
+                nombre: columna[indices.nombre],
+                latitud: columna[indices.latitud],
+                longitud: columna[indices.longitud]
+            })
+        }
+    }
+
+    console.log("Archivo con datos grográficos cargado");
+}
+
 function Plano(x, y, z, nombre = undefined) {
     let geometria = new THREE.PlaneBufferGeometry(5, 5);
     let material = new THREE.MeshBasicMaterial({});
@@ -157,6 +198,13 @@ function texturizarPlano(plano, textura) {
         }
     )
 }
+
+//valor, rango origen, rango destino
+function mapeo(val, vmin, vmax, dmin, dmax) {
+    //Normaliza valor en el rango de partida, t=0 en vmin, t=1 en vmax
+    let t = 1 - (vmax - val) / (vmax - vmin);
+    return dmin + t * (dmax - dmin);
+  }
 
 function onDocumentClick(event) {
     const mouse = {

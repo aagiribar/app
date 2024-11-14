@@ -36,7 +36,7 @@ animationLoop();
 function init() {
     for (let i = 0; i < elecciones.length; i++) {
         fetch(elecciones[i] + ".csv")
-    .   then(respuesta => {
+        .then(respuesta => {
             if (!respuesta.ok) {
                 throw new Error("Error: " + respuesta.statusText);
             }
@@ -44,7 +44,7 @@ function init() {
         })
         .then(contenido => {
             procesarDatosElect(contenido);
-            console.log("Fichero " + elecciones[i] + ".csv cargado");
+            //console.log("Fichero " + elecciones[i] + ".csv cargado");
         })
         .catch(error => {
             console.error("Error al cargar el archivo", error);

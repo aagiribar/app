@@ -13,7 +13,9 @@ let maxLon_can = -13.310;
 let minLat_can = 27.406;
 let maxLat_can = 29.473;
 
-let datosParo = []
+const elecciones = ["2015", "2016", "04_2019", "11_2019", "2023"];
+
+let datosElect = []
 let datosGeo = [];
 
 let mapaEs, mapaCan;
@@ -32,19 +34,22 @@ init();
 animationLoop();
 
 function init() {
-    fetch("datos_paro.csv")
-    .then(respuesta => {
-        if (!respuesta.ok) {
-            throw new Error("Error: " + respuesta.statusText);
-        }
-        return respuesta.text();
-    })
-    .then(contenido => {
-        procesarDatosParo(contenido);
-    })
-    .catch(error => {
-        console.error("Error al cargar el archivo", error);
-    });
+    for (let i = 0; i < elecciones.length; i++) {
+        fetch(elecciones[i] + ".csv")
+    .   then(respuesta => {
+            if (!respuesta.ok) {
+                throw new Error("Error: " + respuesta.statusText);
+            }
+            return respuesta.text();
+        })
+        .then(contenido => {
+            procesarDatosElect(contenido);
+            console.log("Fichero " + elecciones[i] + ".csv cargado");
+        })
+        .catch(error => {
+            console.error("Error al cargar el archivo", error);
+        });
+    }
 
     fetch("datos_geo.csv")
     .then(respuesta => {
@@ -105,33 +110,18 @@ function init() {
     )
 }
 
-
-function procesarDatosParo(contenido) {
+function procesarDatosElect(contenido) {
     const sep = ";";
     const filas = contenido.split("\n");
-    
+
     const encabezados = filas[0].split(sep);
 
-    const indices = {
-        sexo: encabezados.indexOf("Sexo"),
-        provincia: encabezados.indexOf("Provincias"),
-        periodo: encabezados.indexOf("Periodo"),
-        total: encabezados.indexOf("Total\r")
-    }
+    datosElect.push({
+        encabezados: encabezados,
+        resultados: filas.slice(1)
+    });
 
-    for (let i = 1; i < filas.length; i++) {
-        const columna = filas[i].split(sep);
-        if (columna.length > 1) {
-            datosParo.push({
-                sexo: columna[indices.sexo],
-                provincia: columna[indices.provincia],
-                periodo: columna[indices.periodo],
-                total: columna[indices.total]
-            })
-        }
-    }
-
-    console.log("Archivo con datos de paro cargado");
+    console.log(datosElect);
 }
 
 function procesarDatosGeo(contenido) {

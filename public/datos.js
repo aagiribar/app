@@ -19,6 +19,8 @@ let datosElect = []
 let datosGeo = [];
 let datosCol = [];
 
+let objetos = [];
+
 let mapaEs, mapaCan;
 
 let escena, camara, renderer;
@@ -123,7 +125,7 @@ function init() {
                 focoCamara = mapaCan;
             }
         }
-    )
+    );
 }
 
 function procesarDatosElect(contenido) {
@@ -192,6 +194,18 @@ function Plano(x, y, z, nombre = undefined) {
     if (nombre != undefined) {
         mesh.userData.nombre = nombre;
     }
+    escena.add(mesh);
+    return mesh;
+}
+
+function Cubo(x, y, z, ancho, alto, profundidad, color) {
+    let geometria = new THREE.BoxGeometry(ancho, alto, profundidad);
+    let material = new THREE.MeshBasicMaterial({
+        color: color
+    });
+    let mesh = new THREE.Mesh(geometria, material);
+
+    mesh.position.set(x, y, z);
     escena.add(mesh);
     return mesh;
 }

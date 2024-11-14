@@ -17,6 +17,7 @@ const elecciones = ["2015", "2016", "04_2019", "11_2019", "2023"];
 
 let datosElect = []
 let datosGeo = [];
+let datosCol = [];
 
 let mapaEs, mapaCan;
 
@@ -44,7 +45,22 @@ function init() {
         })
         .then(contenido => {
             procesarDatosElect(contenido);
-            //console.log("Fichero " + elecciones[i] + ".csv cargado");
+            console.log("Fichero " + elecciones[i] + ".csv cargado");
+        })
+        .catch(error => {
+            console.error("Error al cargar el archivo", error);
+        });
+
+        fetch("colores_" + elecciones[i] + ".csv")
+        .then(respuesta => {
+            if (!respuesta.ok) {
+                throw new Error("Error: " + respuesta.statusText);
+            }
+            return respuesta.text();
+        })
+        .then(contenido => {
+            procesarDatosColores(contenido);
+            console.log("Fichero colores_" + elecciones[i] + ".csv cargado");
         })
         .catch(error => {
             console.error("Error al cargar el archivo", error);
@@ -120,8 +136,6 @@ function procesarDatosElect(contenido) {
         encabezados: encabezados,
         resultados: filas.slice(1)
     });
-
-    console.log(datosElect);
 }
 
 function procesarDatosGeo(contenido) {
@@ -148,6 +162,23 @@ function procesarDatosGeo(contenido) {
     }
 
     console.log("Archivo con datos grográficos cargado");
+}
+
+function procesarDatosColores(contenido) {
+    const sep = ";";
+    const filas = contenido.split("\n");
+
+    const encabezados = filas[0].split(sep);
+
+    let colores = [];
+    for (let i = 1; i < filas.length; i++) {
+        const columna = filas[i].split(sep);
+        if (columna.length > 1) {
+            colores.push(columna[1]);
+        }
+    }
+
+    datosCol.push(colores);
 }
 
 function Plano(x, y, z, nombre = undefined) {

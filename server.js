@@ -18,7 +18,8 @@ app.get("/", function (request, response) {
 
 app.use(express.static("assets"));
 app.use(express.static("data"));
-app.use(express.static("data/resultados"))
+app.use(express.static("data/resultados"));
+app.use(express.static("data/colores"));
 
 // listen for requests :)
 var listener = app.listen(/*process.env.PORT*/ 3000, function () {

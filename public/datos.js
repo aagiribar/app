@@ -33,56 +33,11 @@ let selectorMapa;
 
 let raycaster;
 
+await cargarDatos();
 init();
 animationLoop();
 
 function init() {
-    for (let i = 0; i < elecciones.length; i++) {
-        fetch(elecciones[i] + ".csv")
-        .then(respuesta => {
-            if (!respuesta.ok) {
-                throw new Error("Error: " + respuesta.statusText);
-            }
-            return respuesta.text();
-        })
-        .then(contenido => {
-            procesarDatosElect(contenido);
-            console.log("Fichero " + elecciones[i] + ".csv cargado");
-        })
-        .catch(error => {
-            console.error("Error al cargar el archivo", error);
-        });
-
-        fetch("colores_" + elecciones[i] + ".csv")
-        .then(respuesta => {
-            if (!respuesta.ok) {
-                throw new Error("Error: " + respuesta.statusText);
-            }
-            return respuesta.text();
-        })
-        .then(contenido => {
-            procesarDatosColores(contenido);
-            console.log("Fichero colores_" + elecciones[i] + ".csv cargado");
-        })
-        .catch(error => {
-            console.error("Error al cargar el archivo", error);
-        });
-    }
-
-    fetch("datos_geo.csv")
-    .then(respuesta => {
-        if (!respuesta.ok) {
-            throw new Error("Error: " + respuesta.statusText);
-        }
-        return respuesta.text();
-    })
-    .then(contenido => {
-        procesarDatosGeo(contenido);
-    })
-    .catch(error => {
-        console.error("Error al cargar el archivo", error);
-    });
-
     escena = new THREE.Scene();
 
     camara = new THREE.PerspectiveCamera(
@@ -128,15 +83,73 @@ function init() {
     );
 }
 
-function procesarDatosElect(contenido) {
+async function cargarDatos() {
+    for (let i = 0; i < elecciones.length; i++) {
+        await fetch(elecciones[i] + ".csv")
+        .then(respuesta => {
+            if (!respuesta.ok) {
+                throw new Error("Error: " + respuesta.statusText);
+            }
+            return respuesta.text();
+        })
+        .then(contenido => {
+            procesarDatosElect(contenido, i);
+            console.log("Fichero " + elecciones[i] + ".csv cargado");
+        })
+        .catch(error => {
+            console.error("Error al cargar el archivo", error);
+        });
+
+        await fetch("colores_" + elecciones[i] + ".csv")
+        .then(respuesta => {
+            if (!respuesta.ok) {
+                throw new Error("Error: " + respuesta.statusText);
+            }
+            return respuesta.text();
+        })
+        .then(contenido => {
+            procesarDatosColores(contenido);
+            console.log("Fichero colores_" + elecciones[i] + ".csv cargado");
+        })
+        .catch(error => {
+            console.error("Error al cargar el archivo", error);
+        });
+    }
+
+    await fetch("datos_geo.csv")
+    .then(respuesta => {
+        if (!respuesta.ok) {
+            throw new Error("Error: " + respuesta.statusText);
+        }
+        return respuesta.text();
+    })
+    .then(contenido => {
+        procesarDatosGeo(contenido);
+    })
+    .catch(error => {
+        console.error("Error al cargar el archivo", error);
+    });
+}
+
+function procesarDatosElect(contenido, indice) {
     const sep = ";";
     const filas = contenido.split("\n");
 
     const encabezados = filas[0].split(sep);
 
+    let resultados = [];
+
+    for (let i = 1; i < filas.length; i++) {
+        const columna = filas[i].split(sep);
+        if (columna.length > 1) {
+            resultados.push(columna);
+        }
+    }
+
     datosElect.push({
+        indice: indice,
         encabezados: encabezados,
-        resultados: filas.slice(1)
+        resultados: resultados
     });
 }
 
@@ -210,6 +223,53 @@ function Cubo(x, y, z, ancho, alto, profundidad, color) {
     return mesh;
 }
 
+function dibujarDatosProvincia(datosEleccion, indiceProvincia) {
+    let datosProvincia = datosEleccion.resultados[indiceProvincia];
+    const coordenadas = obtenerCoordenadas(datosProvincia[0]);
+
+    let cubos = [];
+    const resultados = datosEleccion.resultados[indiceProvincia];
+
+    let profundidadAnterior = 0;
+    let zCuboAnterior = 0;
+    for (let i = 1; i < resultados.length; i++) {
+        const diputados = parseInt(resultados[i]);
+        if (diputados > 0) {
+            let coordenadasMapa = obtenerCoordenadasMapa(coordenadas);
+            let profundidad = diputados * 0.03;
+            let color = obtenerColor(datosEleccion.indice, i);
+            let zNuevoCubo = zCuboAnterior + (profundidadAnterior / 2) + (profundidad / 2);
+            let cubo = Cubo(coordenadasMapa[0], coordenadasMapa[1], zNuevoCubo, 0.15, 0.15, profundidad, color);
+            cubos.push(cubo);
+            profundidadAnterior = profundidad;
+            zCuboAnterior = zNuevoCubo;
+        }
+    }
+    return cubos;
+}
+
+function obtenerCoordenadas(provincia) {
+    let provinciaEncontrada = datosGeo.find((valor) => valor.nombre == provincia);
+    return [parseFloat(provinciaEncontrada.longitud), parseFloat(provinciaEncontrada.latitud)];
+}
+
+function obtenerCoordenadasMapa(coordenadas) {
+    let longitud, latitud;
+    if (coordenadas[1] < 30) {
+        longitud = (mapeo(coordenadas[0], minLon_can, maxLon_can, -mapaCan.userData.mapsX / 2, mapaCan.userData.mapsX / 2)) - 10;
+        latitud = mapeo(coordenadas[1], minLat_can, maxLat_can, -mapaCan.userData.mapsY / 2, mapaCan.userData.mapsY);
+    }
+    else {
+        longitud = mapeo(coordenadas[0], minLon_es, maxLon_es, -(mapaEs.userData.mapsX / 2), mapaEs.userData.mapsX / 2);
+        latitud = mapeo(coordenadas[1], minLat_es, maxLat_es, -(mapaEs.userData.mapsY / 2), mapaEs.userData.mapsY / 2);
+    }
+    return [longitud, latitud];
+}
+
+function obtenerColor(indiceEleccion, indicePartido) {
+    return parseInt(datosCol[indiceEleccion][indicePartido]);
+}
+
 function texturizarPlano(plano, textura) {
     new THREE.TextureLoader().load(
         textura,
@@ -220,7 +280,7 @@ function texturizarPlano(plano, textura) {
             const txHeight = textura.image.height;
             const txWidth = textura.image.width;
 
-            if (txHeight > txWidth) {m
+            if (txHeight > txWidth) {
                 let factor = txHeight / txWidth;
                 plano.scale.set(1, factor, 1);
                 plano.userData.mapsY *= factor;

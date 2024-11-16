@@ -36,8 +36,6 @@ const gui = new GUI();
 let elementosUI;
 let selectorMapa, selectorEleccion, selectorProvincia;
 
-let raycaster;
-
 await cargarDatos();
 init();
 animationLoop();
@@ -58,9 +56,6 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    raycaster = new THREE.Raycaster();
-    document.addEventListener("click", onDocumentClick);
-
     controlOrbital = new OrbitControls(camara, renderer.domElement);
 
     mapaEs = Plano(0, 0, 0, "España");
@@ -69,7 +64,7 @@ function init() {
     mapaCan = Plano(-10, 0, 0, "Canarias");
     texturizarPlano(mapaCan, "mapa_can.png");
 
-    focoCamara = mapaEs;
+    focoCamara = [0, 0, 0];
 
     elementosUI = {
         "Mapa seleccionado": "España",
@@ -81,10 +76,10 @@ function init() {
     selectorMapa.onChange(
         function(valor) {
             if (valor == "España") {
-                focoCamara = mapaEs;
+                focoCamara = [0, 0, 0];
             }
             else if (valor == "Canarias") {
-                focoCamara = mapaCan;
+                focoCamara = [-10, 0, 0];
             }
         }
     );
@@ -106,6 +101,17 @@ function init() {
         function(valor) {
             mostrarDatosEleccion(eleccionActual[1], valor);
             provinciaActual = valor;
+
+            if(valor == "Todas") {
+                selectorMapa.show();
+                focoCamara = [0, 0, 0];
+                selectorMapa.setValue("España");
+            }
+            else {
+                selectorMapa.hide();
+                let coordenadas = obtenerCoordenadasMapa(obtenerCoordenadas(valor));
+                focoCamara = [coordenadas[0], coordenadas[1], 0];
+            }
         }
     )
 
@@ -380,29 +386,13 @@ function obtenerNombresProvincias() {
     return nombres;
 }
 
-function onDocumentClick(event) {
-    const mouse = {
-        x: (event.clientX / renderer.domElement.clientWidth) * 2 - 1,
-        y: -(event.clientY / renderer.domElement.clientHeight) * 2 + 1,
-    };
-
-    // Intersección, define rayo
-    raycaster.setFromCamera(mouse, camara);
-
-    const intersecciones = raycaster.intersectObjects([mapaEs, mapaCan]);
-    if (intersecciones.length > 0) {
-        focoCamara = intersecciones[0].object;
-        selectorMapa.setValue(focoCamara.userData.nombre);
-    }
-}
-
 function animationLoop() {
     requestAnimationFrame(animationLoop);
     
     // Se recoloca el foco de la camara orbital
-    controlOrbital.target.x = focoCamara.position.x;
-    controlOrbital.target.y = focoCamara.position.y;
-    controlOrbital.target.z = focoCamara.position.z;
+    controlOrbital.target.x = focoCamara[0];
+    controlOrbital.target.y = focoCamara[1];
+    controlOrbital.target.z = focoCamara[2];
     controlOrbital.update();
 
     renderer.render(escena, camara);

@@ -14,6 +14,7 @@ let minLat_can = 27.406;
 let maxLat_can = 29.473;
 
 const elecciones = ["2015", "2016", "04_2019", "11_2019", "2023"];
+const textosElecciones = ["Diciembre de 2015", "Junio de 2016", "Abril de 2019", "Noviembre de 2019", "Julio de 2023"]
 let eleccionActual;
 
 let datosElect = []
@@ -30,7 +31,7 @@ let controlOrbital;
 
 const gui = new GUI();
 let elementosUI;
-let selectorMapa;
+let selectorMapa, selectorEleccion;
 
 let raycaster;
 
@@ -68,7 +69,8 @@ function init() {
     focoCamara = mapaEs;
 
     elementosUI = {
-        "Mapa seleccionado": "España"
+        "Mapa seleccionado": "España",
+        "Elección seleccionada": "Diciembre de 2015"
     }
 
     selectorMapa = gui.add(elementosUI, "Mapa seleccionado", ["España", "Canarias"]);
@@ -80,6 +82,15 @@ function init() {
             else if (valor == "Canarias") {
                 focoCamara = mapaCan;
             }
+        }
+    );
+
+    selectorEleccion = gui.add(elementosUI, "Elección seleccionada", textosElecciones);
+    selectorEleccion.onChange(
+        function(valor) {
+            let indice = textosElecciones.findIndex((texto) => valor == texto);
+            mostrarDatosEleccion(indice);
+            eleccionActual = [elecciones[indice], indice];
         }
     );
 

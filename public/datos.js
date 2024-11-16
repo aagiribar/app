@@ -26,6 +26,8 @@ let provinciaActual = "Todas";
 
 let objetos = [];
 
+let elementosInfoGeneral = [];
+
 let mapaEs, mapaCan;
 
 let escena, camara, renderer;
@@ -36,11 +38,28 @@ const gui = new GUI();
 let elementosUI;
 let selectorMapa, selectorEleccion, selectorProvincia;
 
+let info;
+
 await cargarDatos();
 init();
 animationLoop();
 
 function init() {
+    info = document.createElement('div');
+    info.style.position = 'absolute';
+    info.style.top = '30px';
+    info.style.width = '100%';
+    info.style.textAlign = 'left';
+    info.style.color = '#fff';
+    info.style.fontWeight = 'bold';
+    info.style.backgroundColor = 'transparent';
+    info.style.zIndex = '1';
+    info.style.fontFamily = 'Monospace';
+    info.innerHTML = "Resultados";
+    document.body.appendChild(info);
+    crearInfoResultadosGeneral();
+    info.appendChild(elementosInfoGeneral[0]);
+
     escena = new THREE.Scene();
 
     camara = new THREE.PerspectiveCamera(
@@ -89,7 +108,9 @@ function init() {
         function(valor) {
             let indice = textosElecciones.findIndex((texto) => valor == texto);
             mostrarDatosEleccion(indice, provinciaActual);
+            info.removeChild(elementosInfoGeneral[eleccionActual[1]]);
             eleccionActual = [elecciones[indice], indice];
+            info.appendChild(elementosInfoGeneral[eleccionActual[1]]);
         }
     );
 
@@ -177,6 +198,7 @@ function procesarDatosElect(contenido, indice) {
     const encabezados = filas[0].split(sep);
 
     let resultados = [];
+    let totales = filas.pop();
 
     for (let i = 1; i < filas.length; i++) {
         const columna = filas[i].split(sep);
@@ -188,7 +210,8 @@ function procesarDatosElect(contenido, indice) {
     datosElect.push({
         indice: indice,
         encabezados: encabezados,
-        resultados: resultados
+        resultados: resultados,
+        totales: totales.split(sep)
     });
 }
 
@@ -341,8 +364,14 @@ function obtenerCoordenadasMapa(coordenadas) {
     return [longitud, latitud];
 }
 
-function obtenerColor(indiceEleccion, indicePartido) {
-    return parseInt(datosCol[indiceEleccion][indicePartido]);
+function obtenerColor(indiceEleccion, indicePartido, numero = true) {
+    console.log(datosCol[indiceEleccion][indicePartido], indiceEleccion, indicePartido);
+    if (numero) {
+        return parseInt(datosCol[indiceEleccion][indicePartido]);
+    }
+    else {
+        return "#" + datosCol[indiceEleccion][indicePartido].substring(2);
+    }
 }
 
 function texturizarPlano(plano, textura) {
@@ -384,6 +413,28 @@ function obtenerNombresProvincias() {
     }
 
     return nombres;
+}
+
+function crearInfoResultadosGeneral() {
+    for (let i = 0; i < elecciones.length; i++) {
+        let totales = datosElect[i].totales;
+        let encabezados = datosElect[i].encabezados;
+        let elemento = document.createElement("div");
+
+        elemento.innerHTML = "Resultados Generales - Elecciones de " + textosElecciones[i];
+        for (let j = 1; j < totales.length; j++) {
+            let infoPartido = document.createElement("div");
+            let nombrePartido = document.createElement("span");
+            nombrePartido.innerHTML = encabezados[j];
+            nombrePartido.style.color = obtenerColor(i, j - 1, false);
+            infoPartido.appendChild(nombrePartido);
+            let diputadosPartido = document.createElement("span");
+            diputadosPartido.innerHTML = " - " + totales[j];
+            infoPartido.appendChild(diputadosPartido);
+            elemento.appendChild(infoPartido);
+        }
+        elementosInfoGeneral.push(elemento);
+    }
 }
 
 function animationLoop() {

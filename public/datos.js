@@ -14,9 +14,9 @@ let minLat_can = 27.406;
 let maxLat_can = 29.473;
 
 // Array con parte de los nombres de los archivos de datos
-const elecciones = ["2015", "2016", "04_2019", "11_2019", "2023"];
+const elecciones = ["2011", "2015", "2016", "04_2019", "11_2019", "2023"];
 // Array con los textos que mostrar en el selector
-const textosElecciones = ["Diciembre de 2015", "Junio de 2016", "Abril de 2019", "Noviembre de 2019", "Julio de 2023"]
+const textosElecciones = ["Noviembre de 2011", "Diciembre de 2015", "Junio de 2016", "Abril de 2019", "Noviembre de 2019", "Julio de 2023"]
 // Array que contiene el valor y el indice del proceso electoral seleccionado
 let eleccionActual;
 
@@ -91,7 +91,6 @@ function init() {
     document.body.appendChild(info);
     crearInfoResultadosGeneral();
     crearInfoResultadosProvincia();
-    console.log(elementosInfoProvincias);
     info.appendChild(elementosInfoGeneral[0]);
     infoActual = elementosInfoGeneral[0];
 
@@ -130,7 +129,7 @@ function init() {
     // Objeto que almacena los elementos de la interfaz de usuario
     elementosUI = {
         "Mapa seleccionado": "España",
-        "Elección seleccionada": "Diciembre de 2015",
+        "Elección seleccionada": textosElecciones[0],
         "Provincia": "Todas"
     }
 
@@ -204,7 +203,7 @@ function init() {
     }
     // Se muestran los resultados del primer proceso electoral
     mostrarDatosEleccion(0, "Todas");
-    eleccionActual = ["2015", 0];
+    eleccionActual = [elecciones[0], 0];
 }
 
 // Función que carga los datos necesarios para la ejecución de la simulación
@@ -434,6 +433,7 @@ function dibujarDatosProvincia(datosEleccion, indiceProvincia) {
 // Función para obtener las coordenadas de una provincia de los datos geográficos
 // provincia: Nombre de la provincia
 function obtenerCoordenadas(provincia) {
+    console.log(provincia);
     let provinciaEncontrada = datosGeo.find((valor) => valor.nombre == provincia);
     return [parseFloat(provinciaEncontrada.longitud), parseFloat(provinciaEncontrada.latitud)];
 }

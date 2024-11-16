@@ -26,7 +26,9 @@ let provinciaActual = "Todas";
 
 let objetos = [];
 
+let infoActual;
 let elementosInfoGeneral = [];
+let elementosInfoProvincias = [];
 
 let mapaEs, mapaCan;
 
@@ -58,7 +60,10 @@ function init() {
     info.innerHTML = "Resultados";
     document.body.appendChild(info);
     crearInfoResultadosGeneral();
+    crearInfoResultadosProvincia();
+    console.log(elementosInfoProvincias);
     info.appendChild(elementosInfoGeneral[0]);
+    infoActual = elementosInfoGeneral[0];
 
     escena = new THREE.Scene();
 
@@ -108,9 +113,17 @@ function init() {
         function(valor) {
             let indice = textosElecciones.findIndex((texto) => valor == texto);
             mostrarDatosEleccion(indice, provinciaActual);
-            info.removeChild(elementosInfoGeneral[eleccionActual[1]]);
+            info.removeChild(infoActual);
             eleccionActual = [elecciones[indice], indice];
-            info.appendChild(elementosInfoGeneral[eleccionActual[1]]);
+            if (provinciaActual == "Todas") {
+                infoActual = elementosInfoGeneral[eleccionActual[1]];
+                info.appendChild(infoActual);
+            }
+            else {
+                let indice = elementosInfoProvincias[eleccionActual[1]].findIndex((elemento) => elemento.id == provinciaActual);
+                infoActual = elementosInfoProvincias[eleccionActual[1]][indice];
+                info.appendChild(infoActual);
+            }
         }
     );
 
@@ -120,6 +133,7 @@ function init() {
     selectorProvincia = gui.add(elementosUI, "Provincia", nombresProvincias);
     selectorProvincia.onChange(
         function(valor) {
+            info.removeChild(infoActual);
             mostrarDatosEleccion(eleccionActual[1], valor);
             provinciaActual = valor;
 
@@ -127,11 +141,16 @@ function init() {
                 selectorMapa.show();
                 focoCamara = [0, 0, 0];
                 selectorMapa.setValue("España");
+                infoActual = elementosInfoGeneral[eleccionActual[1]];
+                info.appendChild(infoActual);
             }
             else {
                 selectorMapa.hide();
                 let coordenadas = obtenerCoordenadasMapa(obtenerCoordenadas(valor));
                 focoCamara = [coordenadas[0], coordenadas[1], 0];
+                let indice = elementosInfoProvincias[eleccionActual[1]].findIndex((elemento) => elemento.id == valor);
+                infoActual = elementosInfoProvincias[eleccionActual[1]][indice];
+                info.appendChild(infoActual);
             }
         }
     )
@@ -365,7 +384,6 @@ function obtenerCoordenadasMapa(coordenadas) {
 }
 
 function obtenerColor(indiceEleccion, indicePartido, numero = true) {
-    console.log(datosCol[indiceEleccion][indicePartido], indiceEleccion, indicePartido);
     if (numero) {
         return parseInt(datosCol[indiceEleccion][indicePartido]);
     }
@@ -435,6 +453,38 @@ function crearInfoResultadosGeneral() {
         }
         elementosInfoGeneral.push(elemento);
     }
+}
+
+function crearInfoResultadosProvincia() {
+    let elementosInfo = [];
+    for (let i = 0; i < elecciones.length; i++) {
+        let resultados = datosElect[i].resultados;
+        let encabezados = datosElect[i].encabezados;
+        let elementosInfoActual = [];
+
+        for (let j = 0; j < resultados.length; j++) {
+            let elemento = document.createElement("div");
+            elemento.id = resultados[j][0];
+            elemento.innerHTML = "Resultados de la provincia de " + elemento.id + " - Elecciones de " + textosElecciones[i];
+            
+            for (let k = 1; k < resultados[j].length; k++) {
+                if(resultados[j][k] != 0) {
+                    let infoPartido = document.createElement("div");
+                    let nombrePartido = document.createElement("span");
+                    nombrePartido.innerHTML = encabezados[k];
+                    nombrePartido.style.color = obtenerColor(i, k - 1, false);
+                    infoPartido.appendChild(nombrePartido);
+                    let diputadosPartido = document.createElement("span");
+                    diputadosPartido.innerHTML = " - " + resultados[j][k];
+                    infoPartido.appendChild(diputadosPartido);
+                    elemento.appendChild(infoPartido);
+                }
+            }
+            elementosInfoActual.push(elemento);
+        }
+        elementosInfo.push(elementosInfoActual);
+    }
+    elementosInfoProvincias = elementosInfo;
 }
 
 function animationLoop() {

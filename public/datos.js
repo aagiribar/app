@@ -21,6 +21,9 @@ let datosElect = []
 let datosGeo = [];
 let datosCol = [];
 
+let nombresProvincias = [];
+let provinciaActual = "Todas";
+
 let objetos = [];
 
 let mapaEs, mapaCan;
@@ -31,7 +34,7 @@ let controlOrbital;
 
 const gui = new GUI();
 let elementosUI;
-let selectorMapa, selectorEleccion;
+let selectorMapa, selectorEleccion, selectorProvincia;
 
 let raycaster;
 
@@ -70,7 +73,8 @@ function init() {
 
     elementosUI = {
         "Mapa seleccionado": "España",
-        "Elección seleccionada": "Diciembre de 2015"
+        "Elección seleccionada": "Diciembre de 2015",
+        "Provincia": "Todas"
     }
 
     selectorMapa = gui.add(elementosUI, "Mapa seleccionado", ["España", "Canarias"]);
@@ -89,15 +93,26 @@ function init() {
     selectorEleccion.onChange(
         function(valor) {
             let indice = textosElecciones.findIndex((texto) => valor == texto);
-            mostrarDatosEleccion(indice);
+            mostrarDatosEleccion(indice, provinciaActual);
             eleccionActual = [elecciones[indice], indice];
         }
     );
 
+    nombresProvincias = obtenerNombresProvincias();
+    nombresProvincias.push("Todas");
+
+    selectorProvincia = gui.add(elementosUI, "Provincia", nombresProvincias);
+    selectorProvincia.onChange(
+        function(valor) {
+            mostrarDatosEleccion(eleccionActual[1], valor);
+            provinciaActual = valor;
+        }
+    )
+
     for (let i = 0; i < elecciones.length; i++) {
         objetos.push(dibujarDatosEleccion(datosElect[i]));
     }
-    mostrarDatosEleccion(0);
+    mostrarDatosEleccion(0, "Todas");
     eleccionActual = ["2015", 0];
 }
 
@@ -229,7 +244,7 @@ function Plano(x, y, z, nombre = undefined) {
     return mesh;
 }
 
-function Cubo(x, y, z, ancho, alto, profundidad, color) {
+function Cubo(x, y, z, ancho, alto, profundidad, color, nombre = undefined) {
     let geometria = new THREE.BoxGeometry(ancho, alto, profundidad);
     let material = new THREE.MeshBasicMaterial({
         color: color
@@ -238,11 +253,14 @@ function Cubo(x, y, z, ancho, alto, profundidad, color) {
 
     mesh.position.set(x, y, z);
     mesh.visible = false;
+    if (nombre != undefined) {
+        mesh.userData.nombre = nombre;
+    }
     escena.add(mesh);
     return mesh;
 }
 
-function mostrarDatosEleccion(indiceEleccion) {
+function mostrarDatosEleccion(indiceEleccion, provincia) {
     let cubosEleccion, cubosProvincia;
 
     if(eleccionActual != undefined) {
@@ -259,7 +277,9 @@ function mostrarDatosEleccion(indiceEleccion) {
     for (let i = 0; i < cubosEleccion.length; i++) {
         cubosProvincia = cubosEleccion[i];
         for (let j = 0; j < cubosProvincia.length; j++) {
-            cubosProvincia[j].visible = true;
+            if (provincia == "Todas" || cubosProvincia[j].userData.nombre == provincia) {
+                cubosProvincia[j].visible = true;
+            }
         }
     }
 }
@@ -288,7 +308,7 @@ function dibujarDatosProvincia(datosEleccion, indiceProvincia) {
             let profundidad = diputados * 0.03;
             let color = obtenerColor(datosEleccion.indice, i - 1);
             let zNuevoCubo = zCuboAnterior + (profundidadAnterior / 2) + (profundidad / 2);
-            let cubo = Cubo(coordenadasMapa[0], coordenadasMapa[1], zNuevoCubo, 0.15, 0.15, profundidad, color);
+            let cubo = Cubo(coordenadasMapa[0], coordenadasMapa[1], zNuevoCubo, 0.15, 0.15, profundidad, color, resultados[0]);
             cubos.push(cubo);
             profundidadAnterior = profundidad;
             zCuboAnterior = zNuevoCubo;
@@ -348,7 +368,17 @@ function mapeo(val, vmin, vmax, dmin, dmax) {
     //Normaliza valor en el rango de partida, t=0 en vmin, t=1 en vmax
     let t = 1 - (vmax - val) / (vmax - vmin);
     return dmin + t * (dmax - dmin);
-  }
+}
+
+function obtenerNombresProvincias() {
+    let nombres = [];
+
+    for (let i = 0; i < datosGeo.length; i++) {
+        nombres.push(datosGeo[i].nombre);
+    }
+
+    return nombres;
+}
 
 function onDocumentClick(event) {
     const mouse = {

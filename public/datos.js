@@ -433,7 +433,6 @@ function dibujarDatosProvincia(datosEleccion, indiceProvincia) {
 // Función para obtener las coordenadas de una provincia de los datos geográficos
 // provincia: Nombre de la provincia
 function obtenerCoordenadas(provincia) {
-    console.log(provincia);
     let provinciaEncontrada = datosGeo.find((valor) => valor.nombre == provincia);
     return [parseFloat(provinciaEncontrada.longitud), parseFloat(provinciaEncontrada.latitud)];
 }

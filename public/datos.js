@@ -14,6 +14,7 @@ let minLat_can = 27.406;
 let maxLat_can = 29.473;
 
 const elecciones = ["2015", "2016", "04_2019", "11_2019", "2023"];
+let eleccionActual;
 
 let datosElect = []
 let datosGeo = [];
@@ -81,6 +82,12 @@ function init() {
             }
         }
     );
+
+    for (let i = 0; i < elecciones.length; i++) {
+        objetos.push(dibujarDatosEleccion(datosElect[i]));
+    }
+    mostrarDatosEleccion(0);
+    eleccionActual = ["2015", 0];
 }
 
 async function cargarDatos() {
@@ -219,8 +226,39 @@ function Cubo(x, y, z, ancho, alto, profundidad, color) {
     let mesh = new THREE.Mesh(geometria, material);
 
     mesh.position.set(x, y, z);
+    mesh.visible = false;
     escena.add(mesh);
     return mesh;
+}
+
+function mostrarDatosEleccion(indiceEleccion) {
+    let cubosEleccion, cubosProvincia;
+
+    if(eleccionActual != undefined) {
+        cubosEleccion = objetos[eleccionActual[1]];
+        for (let i = 0; i < cubosEleccion.length; i++) {
+            cubosProvincia = cubosEleccion[i];
+            for (let j = 0; j < cubosProvincia.length; j++) {
+                cubosProvincia[j].visible = false;
+            }
+        }
+    }
+    
+    cubosEleccion = objetos[indiceEleccion];
+    for (let i = 0; i < cubosEleccion.length; i++) {
+        cubosProvincia = cubosEleccion[i];
+        for (let j = 0; j < cubosProvincia.length; j++) {
+            cubosProvincia[j].visible = true;
+        }
+    }
+}
+
+function dibujarDatosEleccion(datosEleccion) {
+    let cubosEleccion = [];
+    for (let i = 0; i < datosEleccion.resultados.length; i++) {
+        cubosEleccion.push(dibujarDatosProvincia(datosEleccion, i));
+    }
+    return cubosEleccion;
 }
 
 function dibujarDatosProvincia(datosEleccion, indiceProvincia) {
@@ -237,7 +275,7 @@ function dibujarDatosProvincia(datosEleccion, indiceProvincia) {
         if (diputados > 0) {
             let coordenadasMapa = obtenerCoordenadasMapa(coordenadas);
             let profundidad = diputados * 0.03;
-            let color = obtenerColor(datosEleccion.indice, i);
+            let color = obtenerColor(datosEleccion.indice, i - 1);
             let zNuevoCubo = zCuboAnterior + (profundidadAnterior / 2) + (profundidad / 2);
             let cubo = Cubo(coordenadasMapa[0], coordenadasMapa[1], zNuevoCubo, 0.15, 0.15, profundidad, color);
             cubos.push(cubo);

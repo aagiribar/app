@@ -3,6 +3,10 @@
 
 Visualización de resultados de las elecciones al Congreso de los Diputados de España por provincias realizada con _three.js_.
 
+## Acceso a la version web
+
+La version web de este proyecto se encuentra en [este proyecto de glitch.com](https://visor-datos-agustin.glitch.me)
+
 ## Datos
 
 Los datos utilizados se encuentran en el directorio **data** organizados de la siguiente manera:

@@ -16,7 +16,7 @@ let maxLat_can = 29.473;
 // Array con parte de los nombres de los archivos de datos
 const elecciones = ["1977", "1979", "1982", "1986", "1989", "1993", "1996", "2000", "2004", "2008", "2011", "2015", "2016", "04_2019", "11_2019", "2023"];
 // Array con los textos que mostrar en el selector
-const textosElecciones = ["Junio de 1977", "Marzo de 1979", "Octubre de 1982", "Junio de 1986", "Octubre de 1989", "Junio de 1993", "Marzo de 1996", "Marzo de 2000", "Marzo de 2004", "Marzo de 2008", "Noviembre de 2011", "Diciembre de 2015", "Junio de 2016", "Abril de 2019", "Noviembre de 2019", "Julio de 2023"]
+const textosElecciones = ["Junio de 1977", "Marzo de 1979", "Octubre de 1982", "Junio de 1986", "Octubre de 1989", "Junio de 1993", "Marzo de 1996", "Marzo de 2000", "Marzo de 2004", "Marzo de 2008", "Noviembre de 2011", "Diciembre de 2015", "Junio de 2016", "Abril de 2019", "Noviembre de 2019", "Julio de 2023"];
 // Array que contiene el valor y el indice del proceso electoral seleccionado
 let eleccionActual;
 

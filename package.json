@@ -2,9 +2,9 @@
   "//1": "describes your app and its dependencies",
   "//2": "https://docs.npmjs.com/files/package.json",
   "//3": "updating this file will download and update your packages",
-  "name": "my-gomix-app",
-  "version": "0.0.1",
-  "description": "What am I about?",
+  "name": "visor-datos-agustin",
+  "version": "1.0.0",
+  "description": "Visualización de resultados de las elecciones al Congreso de los Diputados de España por provincias realizada con three.js.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

@@ -112,6 +112,14 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
+    // Redimensión de la ventana
+    window.addEventListener("resize", function(event) {
+        camara.aspect = window.innerWidth / window.innerHeight;
+        camara.updateProjectionMatrix();
+  
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
     // Creación del control de tipo orbital
     controlOrbital = new OrbitControls(camara, renderer.domElement);
 
